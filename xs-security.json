@@ -1,0 +1,7 @@
+{
+  "xsappname": "zbtpday6exerise3delarosa",
+  "tenant-mode": "dedicated",
+  "description": "Security profile of called application",
+  "scopes": [],
+  "role-templates": []
+}

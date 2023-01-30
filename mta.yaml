@@ -1,0 +1,94 @@
+_schema-version: "3.2"
+ID: zbtp-day6exerise3delarosa
+description: A Fiori application.
+version: 0.0.1
+modules:
+- name: zbtp-day6exerise3delarosa-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: zbtp-day6exerise3delarosa-destination-service
+    parameters:
+      content-target: true
+  - name: zbtp-day6exerise3delarosa-repo-host
+    parameters:
+      service-key:
+        name: zbtp-day6exerise3delarosa-repo-host-key
+  - name: zbtp-day6exerise3delarosa-uaa
+    parameters:
+      service-key:
+        name: zbtp-day6exerise3delarosa-uaa-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: zbtp-day6exerise3delarosa_html_repo_host
+          ServiceInstanceName: zbtp-day6exerise3delarosa-html5-srv
+          ServiceKeyName: zbtp-day6exerise3delarosa-repo-host-key
+          sap.cloud.service: zbtp-day6exerise3delarosa
+        - Authentication: OAuth2UserTokenExchange
+          Name: zbtp-day6exerise3delarosa_uaa
+          ServiceInstanceName: zbtp-day6exerise3delarosa-xsuaa-srv
+          ServiceKeyName: zbtp-day6exerise3delarosa-uaa-key
+          sap.cloud.service: zbtp-day6exerise3delarosa
+        existing_destinations_policy: ignore
+  build-parameters:
+    no-source: true
+- name: zbtp-day6exerise3delarosa-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: zbtp-day6exerise3delarosa-repo-host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - zbtpday6exerise3delarosa.zip
+      name: zbtpday6exerise3delarosa
+      target-path: resources/
+- name: zbtpday6exerise3delarosa
+  type: html5
+  path: .
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: zbtp-day6exerise3delarosa-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: zbtp-day6exerise3delarosa-destination-service
+    service-plan: lite
+- name: zbtp-day6exerise3delarosa-uaa
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: zbtp-day6exerise3delarosa-xsuaa-srv
+    service-plan: application
+- name: zbtp-day6exerise3delarosa-repo-host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: zbtp-day6exerise3delarosa-html5-srv
+    service-plan: app-host
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
